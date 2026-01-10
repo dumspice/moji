@@ -6,10 +6,12 @@ import { Input } from "../ui/input";
 import { z } from "zod";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { useAuthStore } from "@/stores/useAuthStore";
+import { useNavigate } from "react-router";
 
 const signUpSchema = z.object({
-  firstname: z.string().min(1, "Tên bắt buộc phải có"),
-  lastname: z.string().min(1, "Họ bắt buộc phải có"),
+  firstName: z.string().min(1, "Tên bắt buộc phải có"),
+  lastName: z.string().min(1, "Họ bắt buộc phải có"),
   username: z.string().min(3, "Tên đăng nhập phải có ít nhất 3 ký tự"),
   email: z.email("Email không hợp lệ"),
   password: z.string().min(6, "Mật khẩu phải có ít nhất 6 ký tự"),
@@ -21,6 +23,8 @@ export function SignupForm({
   className,
   ...props
 }: React.ComponentProps<"div">) {
+  const { signUp } = useAuthStore();
+  const navigate = useNavigate();
   const {
     register,
     handleSubmit,
@@ -30,7 +34,11 @@ export function SignupForm({
   });
 
   const onSubmit = async (data: SignUpFormValues) => {
+    const { firstName, lastName, username, email, password } = data;
     // call backend to sign up
+
+    await signUp(username, password, email, firstName, lastName);
+    navigate("/signin");
   };
 
   return (
@@ -53,31 +61,31 @@ export function SignupForm({
               {/*  fullname */}
               <div className="grid grid-cols-2 gap-3">
                 <div className="space-y-2">
-                  <Label htmlFor="lastname" className="block text-sm">
+                  <Label htmlFor="lastName" className="block text-sm">
                     Họ
                   </Label>
-                  <Input type="text" id="lastname" {...register("lastname")} />
+                  <Input type="text" id="lastName" {...register("lastName")} />
 
-                  {errors.lastname && (
+                  {errors.lastName && (
                     <p className="text-destructive text-sm">
-                      {errors.lastname.message}
+                      {errors.lastName.message}
                     </p>
                   )}
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="firstname" className="block text-sm">
+                  <Label htmlFor="firstName" className="block text-sm">
                     Tên
                   </Label>
                   <Input
                     type="text"
-                    id="firstname"
-                    {...register("firstname")}
+                    id="firstName"
+                    {...register("firstName")}
                   />
 
-                  {errors.firstname && (
+                  {errors.firstName && (
                     <p className="text-destructive text-sm">
-                      {errors.firstname.message}
+                      {errors.firstName.message}
                     </p>
                   )}
                 </div>

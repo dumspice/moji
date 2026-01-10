@@ -1,7 +1,12 @@
+import Logout from "@/components/auth/logout";
 import React from "react";
 
 const ChatAppPage = () => {
-  return <div>ChatAppPage</div>;
+  return (
+    <div>
+      <Logout />
+    </div>
+  );
 };
 
 export default ChatAppPage;
