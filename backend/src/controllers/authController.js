@@ -4,7 +4,7 @@ import User from "../models/Users.js";
 import crypto from "crypto";
 import Session from "../models/Session.js";
 
-const ACCESS_TOKEN_TTL = "30M";
+const ACCESS_TOKEN_TTL = "30s";
 const REFRESH_TOKEN_TTL = 14 * 24 * 60 * 60 * 1000;
 
 export const signUp = async (req, res) => {
@@ -41,7 +41,7 @@ export const signUp = async (req, res) => {
     // return
     return res.sendStatus(204);
   } catch (error) {
-    console.log("Sign up error: ", error);
+    console.error("Sign up error: ", error);
     return res.status(500).json({ message: "Internal Server Error" });
   }
 };
@@ -105,7 +105,7 @@ export const signIn = async (req, res) => {
       accessToken,
     });
   } catch (error) {
-    console.log("Sign in error: ", error);
+    console.error("Sign in error: ", error);
     return res.status(500).json({ message: "Internal Server Error" });
   }
 };
@@ -124,7 +124,43 @@ export const signOut = async (req, res) => {
 
     res.sendStatus(204);
   } catch (error) {
-    console.log("Sign out error: ", error);
+    console.error("Sign out error: ", error);
+    return res.status(500).json({ message: "Internal Server Error" });
+  }
+};
+
+export const refreshToken = async (req, res) => {
+  try {
+    // get refresh token from cookie
+    const token = req.cookies?.refreshToken;
+
+    if (!token) {
+      return res.status(401).json({ message: "Token not found" });
+    }
+
+    // compare refresh token in db
+    const session = await Session.findOne({ refreshToken: token });
+
+    if (!session) {
+      return res.status(403).json({ message: "Invalid token or expired" });
+    }
+
+    // check expiration
+    if (session.expiresAt < new Date()) {
+      return res.status(403).json({ message: "Token is expired" });
+    }
+
+    // generate new access token
+    const accessToken = jwt.sign(
+      { userId: session.userId },
+      process.env.ACCESS_TOKEN_SECRET,
+      { expiresIn: ACCESS_TOKEN_TTL }
+    );
+
+    // return
+    return res.status(200).json({ accessToken });
+  } catch (error) {
+    console.error("Error when call refresh token: ", error);
     return res.status(500).json({ message: "Internal Server Error" });
   }
 };
