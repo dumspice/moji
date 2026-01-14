@@ -1,4 +1,5 @@
-import type { Message } from "react-hook-form";
+import type { Socket } from "socket.io-client";
+import type { Message } from "./chat";
 import type { Conversation } from "./chat";
 import type { User } from "./user";
 
@@ -40,9 +41,28 @@ export interface ChatState {
     }
   >;
   activeConversationId: string | null;
-  loading: boolean;
+  convoLoading: boolean;
+  messageLoading: boolean;
   reset: () => void;
 
   setActiveConversation: (id: string | null) => void;
   fetchConversations: () => Promise<void>;
+  fetchMessages: (conversationId?: string) => Promise<void>;
+  sendDirectMessage: (
+    recipientId: string,
+    content: string,
+    imageUrl?: string
+  ) => Promise<void>;
+  sendGroupMessage: (
+    conversationId: string,
+    content: string,
+    imageUrl?: string
+  ) => Promise<void>;
+}
+
+export interface SocketState {
+  socket: Socket | null;
+  // onlineUsers: string[];
+  connectSocket: () => void;
+  disconnectSocket: () => void;
 }
