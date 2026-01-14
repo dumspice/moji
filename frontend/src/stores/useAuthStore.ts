@@ -94,7 +94,7 @@ export const useAuthStore = create<AuthState>()(
         }
       },
 
-      refresh: async () => {
+      refresh: async (suppressToast = false) => {
         try {
           set({ loading: true });
           const { user, fetchMe, setAccessToken } = get();
@@ -107,7 +107,9 @@ export const useAuthStore = create<AuthState>()(
           }
         } catch (error) {
           console.error(error);
-          toast.error("Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại.");
+          if (!suppressToast) {
+            toast.error("Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại.");
+          }
           get().clearState();
         } finally {
           set({ loading: false });
